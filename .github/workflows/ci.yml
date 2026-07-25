@@ -65,6 +65,12 @@ jobs:
       - name: Aplicar migración 0006 (RLS Fase 1)
         run: psql $DATABASE_URL_OWNER -f migrations/0006_rls_fase1.sql
 
+      - name: Aplicar migración 0007 (DDL Fase 2 — CFDI)
+        run: psql $DATABASE_URL_OWNER -f migrations/0007_fase2_cfdi.sql
+
+      - name: Aplicar migración 0008 (RLS Fase 2)
+        run: psql $DATABASE_URL_OWNER -f migrations/0008_rls_fase2.sql
+
       - name: Typecheck
         run: npm run typecheck
 
