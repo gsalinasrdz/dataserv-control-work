@@ -27,7 +27,9 @@ jobs:
           --health-retries 10
 
     env:
-      DATABASE_URL: postgres://postgres:postgres@localhost:5432/opscore_test
+      # app_user para la app — sujeto a RLS (valida el aislamiento real)
+      DATABASE_URL: postgres://app_user:ci_app_pass@localhost:5432/opscore_test
+      # postgres (superusuario) solo para migraciones
       DATABASE_URL_OWNER: postgres://postgres:postgres@localhost:5432/opscore_test
       AUTH_SECRET: ci-test-secret-32-chars-minimum!!
 
