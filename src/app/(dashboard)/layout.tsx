@@ -1,6 +1,7 @@
 import { auth } from '@/auth';
 import { signOut } from '@/auth';
 import { redirect } from 'next/navigation';
+import Link from 'next/link';
 
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
   const session = await auth();
@@ -10,9 +11,22 @@ export default async function DashboardLayout({ children }: { children: React.Re
     <div className="min-h-screen bg-gray-50">
       <nav className="bg-white shadow-sm border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-14 flex items-center justify-between">
-          <span className="font-semibold text-gray-900">OpsCore</span>
+          <div className="flex items-center gap-8">
+            <Link href="/" className="font-semibold text-gray-900">OpsCore</Link>
+            <div className="hidden sm:flex items-center gap-6">
+              <Link href="/proyectos" className="text-sm text-gray-600 hover:text-gray-900">
+                Proyectos
+              </Link>
+              <Link href="/catalogos/proveedores" className="text-sm text-gray-600 hover:text-gray-900">
+                Proveedores
+              </Link>
+              <Link href="/catalogos/materiales" className="text-sm text-gray-600 hover:text-gray-900">
+                Materiales
+              </Link>
+            </div>
+          </div>
           <div className="flex items-center gap-4">
-            <span className="text-sm text-gray-600">{session.user?.email}</span>
+            <span className="text-sm text-gray-600 hidden sm:block">{session.user?.email}</span>
             <form
               action={async () => {
                 'use server';
