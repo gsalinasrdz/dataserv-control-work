@@ -1,0 +1,15 @@
+# Uso: docker compose -f docker-compose.yml -f docker-compose.dev.yml up postgres minio -d
+services:
+  postgres:
+    ports: ["5432:5432"]
+    volumes:
+      - postgres_dev:/var/lib/postgresql/data
+
+  minio:
+    ports: ["9000:9000", "9001:9001"]
+
+  caddy:
+    profiles: ["prod"]
+
+volumes:
+  postgres_dev:

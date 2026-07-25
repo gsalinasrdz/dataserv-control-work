@@ -1,0 +1,4 @@
+# Este archivo se regenera durante la inicialización del servidor.
+# No commitearlo con contraseñas reales.
+# Formato: "usuario" "contraseña_hasheada_scram-sha-256"
+# Obtener el hash desde psql: SELECT rolpassword FROM pg_authid WHERE rolname = 'app_user';
