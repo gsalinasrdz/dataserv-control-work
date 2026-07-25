@@ -1,0 +1,60 @@
+name: CI
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_DB: opscore_test
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
+    env:
+      DATABASE_URL: postgres://postgres:postgres@localhost:5432/opscore_test
+      DATABASE_URL_OWNER: postgres://postgres:postgres@localhost:5432/opscore_test
+      AUTH_SECRET: ci-test-secret-32-chars-minimum!!
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - name: Aplicar migración 0001 (extensiones y funciones RLS)
+        run: psql $DATABASE_URL_OWNER -f migrations/0001_init_roles_extensions.sql
+
+      - name: Aplicar migración 0002 (tenancy) vía Drizzle
+        run: npm run migrate
+
+      - name: Aplicar migración 0003 (auditoría)
+        run: psql $DATABASE_URL_OWNER -f migrations/0003_auditoria.sql
+
+      - name: Aplicar migración 0004 (Auth.js sessions)
+        run: psql $DATABASE_URL_OWNER -f migrations/0004_auth_sessions.sql
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Tests
+        run: npm run test -- --coverage
