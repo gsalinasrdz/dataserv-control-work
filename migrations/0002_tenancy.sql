@@ -62,7 +62,7 @@ ALTER TABLE usuarios FORCE  ROW LEVEL SECURITY;
 ALTER TABLE usuario_roles ENABLE ROW LEVEL SECURITY;
 ALTER TABLE usuario_roles FORCE  ROW LEVEL SECURITY;
 
--- Políticas: solo ver datos de la propia organización
+-- Políticas SELECT/UPDATE/DELETE: solo la propia organización
 CREATE POLICY org_isolation ON organizaciones
   USING (id = app.organizacion_actual());
 
@@ -74,6 +74,20 @@ CREATE POLICY org_isolation ON usuarios
 
 CREATE POLICY org_isolation ON usuario_roles
   USING (organizacion_id = app.organizacion_actual());
+
+-- Políticas INSERT (WITH CHECK): requieren contexto de usuario activo
+-- organizaciones: cualquier usuario autenticado puede crear orgs (el admin gestiona acceso)
+CREATE POLICY org_isolation_insert ON organizaciones
+  FOR INSERT WITH CHECK (app.usuario_actual() IS NOT NULL);
+
+CREATE POLICY org_isolation_insert ON empresas
+  FOR INSERT WITH CHECK (organizacion_id = app.organizacion_actual());
+
+CREATE POLICY org_isolation_insert ON usuarios
+  FOR INSERT WITH CHECK (organizacion_id = app.organizacion_actual());
+
+CREATE POLICY org_isolation_insert ON usuario_roles
+  FOR INSERT WITH CHECK (organizacion_id = app.organizacion_actual());
 
 -- Permisos DML para app_user (RLS decide qué filas ve)
 GRANT SELECT, INSERT, UPDATE ON organizaciones TO app_user;
