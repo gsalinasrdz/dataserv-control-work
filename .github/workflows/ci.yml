@@ -41,6 +41,13 @@ jobs:
 
       - run: npm ci
 
+      - name: Crear roles de base de datos (equivale a scripts/init-db.sh en CI)
+        run: |
+          psql $DATABASE_URL_OWNER -c "CREATE ROLE app_user LOGIN PASSWORD 'ci_app_pass';"
+          psql $DATABASE_URL_OWNER -c "GRANT CONNECT ON DATABASE opscore_test TO app_user;"
+        env:
+          PGPASSWORD: postgres
+
       - name: Aplicar migración 0001 (extensiones y funciones RLS)
         run: psql $DATABASE_URL_OWNER -f migrations/0001_init_roles_extensions.sql
 
