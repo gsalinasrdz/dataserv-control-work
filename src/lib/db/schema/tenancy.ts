@@ -2,16 +2,10 @@ import {
   pgTable,
   uuid,
   varchar,
-  timestamp,
   pgEnum,
   unique,
 } from 'drizzle-orm/pg-core';
-
-const auditFields = {
-  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
-  updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
-  createdBy: uuid('created_by').notNull(),
-};
+import { auditFields } from './shared';
 
 export const organizaciones = pgTable('organizaciones', {
   id: uuid('id').primaryKey().defaultRandom(),
@@ -53,6 +47,7 @@ export const usuarios = pgTable(
       .references(() => organizaciones.id),
     email: varchar('email', { length: 255 }).notNull(),
     nombre: varchar('nombre', { length: 255 }).notNull(),
+    passwordHash: varchar('password_hash', { length: 255 }),
     ...auditFields,
   },
   (t) => [unique('usuarios_email_org').on(t.email, t.organizacionId)],

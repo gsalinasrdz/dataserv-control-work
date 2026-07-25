@@ -29,13 +29,11 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           .limit(1);
 
         const usuario = rows[0];
-        // password_hash column will be added in T2 migration
-        const passwordHash = (usuario as Record<string, unknown>)['password_hash'] as string | null;
-        if (!usuario || !passwordHash) return null;
+        if (!usuario || !usuario.passwordHash) return null;
 
         const valid = await bcrypt.compare(
           credentials.password as string,
-          passwordHash,
+          usuario.passwordHash,
         );
         if (!valid) return null;
 
