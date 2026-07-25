@@ -28,8 +28,8 @@ describe('parseCSV', () => {
 EST,Estructura,1,EST-001,,m2,100,50`;
     const { filas, errores } = parseCSV(csv);
     expect(filas).toHaveLength(0);
-    expect(errores[0].fila).toBe(2);
-    expect(errores[0].error).toMatch(/trabajo_nombre/);
+    expect(errores[0]!.fila).toBe(2);
+    expect(errores[0]!.error).toMatch(/trabajo_nombre/);
   });
 
   it('reporta error cuando cantidad no es número', () => {
@@ -37,7 +37,7 @@ EST,Estructura,1,EST-001,,m2,100,50`;
 EST,Estructura,1,EST-001,Trazo,m2,INVALIDO,50`;
     const { filas, errores } = parseCSV(csv);
     expect(filas).toHaveLength(0);
-    expect(errores[0].error).toMatch(/cantidad/);
+    expect(errores[0]!.error).toMatch(/cantidad/);
   });
 
   it('ignora líneas vacías', () => {
@@ -55,13 +55,13 @@ EST,Estructura,1,EST-001,Trazo,m2,100,50
 EST,Estructura,1,EST-001,Trazo,m2,100,50`;
     const { filas, errores } = parseCSV(csv);
     expect(filas).toHaveLength(0);
-    expect(errores[0].error).toMatch(/header/);
+    expect(errores[0]!.error).toMatch(/header/);
   });
 
   it('devuelve error con archivo vacío', () => {
     const { filas, errores } = parseCSV('');
     expect(filas).toHaveLength(0);
-    expect(errores[0].error).toMatch(/vacío/);
+    expect(errores[0]!.error).toMatch(/vacío/);
   });
 
   it('reporta error si columnas insuficientes', () => {
@@ -69,6 +69,6 @@ EST,Estructura,1,EST-001,Trazo,m2,100,50`;
 EST,Estructura,1,EST-001,Trazo,m2`;
     const { filas, errores } = parseCSV(csv);
     expect(filas).toHaveLength(0);
-    expect(errores[0].error).toMatch(/columnas/);
+    expect(errores[0]!.error).toMatch(/columnas/);
   });
 });
