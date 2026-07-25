@@ -1,2 +1,1 @@
-// Schema se completa en tareas posteriores
-export {};
+export * from './tenancy';
