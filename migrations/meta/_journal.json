@@ -8,6 +8,13 @@
       "when": 1784961397105,
       "tag": "0002_tenancy",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1753401600000,
+      "tag": "0005_fase1_proyectos_catalogos",
+      "breakpoints": true
     }
   ]
 }

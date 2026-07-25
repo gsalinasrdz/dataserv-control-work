@@ -53,7 +53,7 @@ jobs:
       - name: Aplicar migración 0001 (extensiones y funciones RLS)
         run: psql $DATABASE_URL_OWNER -f migrations/0001_init_roles_extensions.sql
 
-      - name: Aplicar migración 0002 (tenancy) vía Drizzle
+      - name: Aplicar migraciones Drizzle (0002 tenancy + 0005 fase 1 DDL)
         run: npm run migrate
 
       - name: Aplicar migración 0003 (auditoría)
@@ -61,6 +61,9 @@ jobs:
 
       - name: Aplicar migración 0004 (Auth.js sessions)
         run: psql $DATABASE_URL_OWNER -f migrations/0004_auth_sessions.sql
+
+      - name: Aplicar migración 0006 (RLS Fase 1)
+        run: psql $DATABASE_URL_OWNER -f migrations/0006_rls_fase1.sql
 
       - name: Typecheck
         run: npm run typecheck
