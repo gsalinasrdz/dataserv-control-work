@@ -5,6 +5,7 @@ import { Pool } from 'pg';
 import { db } from '@/lib/db';
 import { usuarios } from '@/lib/db/schema';
 import { eq } from 'drizzle-orm';
+import bcrypt from 'bcryptjs';
 
 const authPool = new Pool({ connectionString: process.env['DATABASE_URL'] });
 
@@ -21,8 +22,6 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       async authorize(credentials) {
         if (!credentials?.email || !credentials?.password) return null;
 
-        // Fase 0: login simplificado (sin verificación de contraseña)
-        // Fase 1: agregar password_hash + bcrypt.compare
         const rows = await db
           .select()
           .from(usuarios)
@@ -30,7 +29,15 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           .limit(1);
 
         const usuario = rows[0];
-        if (!usuario) return null;
+        // password_hash column will be added in T2 migration
+        const passwordHash = (usuario as Record<string, unknown>)['password_hash'] as string | null;
+        if (!usuario || !passwordHash) return null;
+
+        const valid = await bcrypt.compare(
+          credentials.password as string,
+          passwordHash,
+        );
+        if (!valid) return null;
 
         return {
           id: usuario.id,
@@ -44,14 +51,14 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   callbacks: {
     jwt({ token, user }) {
       if (user) {
-        token['usuarioId'] = user.id;
-        token['organizacionId'] = (user as { organizacionId?: string }).organizacionId;
+        token.usuarioId = user.id!;
+        token.organizacionId = user.organizacionId;
       }
       return token;
     },
     session({ session, token }) {
-      session.user.id = token['usuarioId'] as string;
-      (session as unknown as Record<string, unknown>)['organizacionId'] = token['organizacionId'];
+      session.user.id = token.usuarioId;
+      session.organizacionId = token.organizacionId;
       return session;
     },
   },

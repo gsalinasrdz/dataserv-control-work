@@ -9,11 +9,6 @@ export interface SessionUser {
 export async function requireAuth(): Promise<SessionUser> {
   const session = await auth();
   if (!session?.user?.id) redirect('/login');
-
-  const organizacionId = (session as unknown as Record<string, unknown>)['organizacionId'] as string | undefined;
-  if (!organizacionId) {
-    throw new Error('Sesión sin organizacionId — revisar callback jwt');
-  }
-
-  return { usuarioId: session.user.id, organizacionId };
+  if (!session.organizacionId) throw new Error('Sesión sin organizacionId — revisar callback jwt');
+  return { usuarioId: session.user.id, organizacionId: session.organizacionId };
 }
