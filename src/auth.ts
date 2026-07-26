@@ -2,16 +2,17 @@ import NextAuth from 'next-auth';
 import Credentials from 'next-auth/providers/credentials';
 import PostgresAdapter from '@auth/pg-adapter';
 import { Pool } from 'pg';
-import { db } from '@/lib/db';
-import { usuarios } from '@/lib/db/schema';
-import { eq } from 'drizzle-orm';
 import bcrypt from 'bcryptjs';
+import { authConfig } from '@/auth.config';
 
 const authPool = new Pool({ connectionString: process.env['DATABASE_URL'] });
 
+// Conexión owner para lookup de credenciales via función SECURITY DEFINER
+const ownerPool = new Pool({ connectionString: process.env['DATABASE_URL_OWNER'] });
+
 export const { handlers, auth, signIn, signOut } = NextAuth({
+  ...authConfig,
   adapter: PostgresAdapter(authPool),
-  session: { strategy: 'jwt' },
   providers: [
     Credentials({
       name: 'Correo y contraseña',
@@ -22,14 +23,27 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       async authorize(credentials) {
         if (!credentials?.email || !credentials?.password) return null;
 
-        const rows = await db
-          .select()
-          .from(usuarios)
-          .where(eq(usuarios.email, credentials.email as string))
-          .limit(1);
+        const result = await ownerPool.query<{
+          id: string;
+          organizacion_id: string;
+          email: string;
+          nombre: string;
+          password_hash: string | null;
+        }>(
+          'SELECT id, organizacion_id, email, nombre, password_hash FROM usuarios WHERE email = $1 LIMIT 1',
+          [credentials.email as string],
+        );
 
-        const usuario = rows[0];
-        if (!usuario || !usuario.passwordHash) return null;
+        const row = result.rows[0];
+        if (!row || !row.password_hash) return null;
+
+        const usuario = {
+          id: row.id,
+          organizacionId: row.organizacion_id,
+          email: row.email,
+          nombre: row.nombre,
+          passwordHash: row.password_hash,
+        };
 
         const valid = await bcrypt.compare(
           credentials.password as string,
@@ -46,19 +60,4 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       },
     }),
   ],
-  callbacks: {
-    jwt({ token, user }) {
-      if (user) {
-        token.usuarioId = user.id!;
-        token.organizacionId = user.organizacionId;
-      }
-      return token;
-    },
-    session({ session, token }) {
-      session.user.id = token.usuarioId;
-      session.organizacionId = token.organizacionId;
-      return session;
-    },
-  },
-  pages: { signIn: '/login' },
 });
