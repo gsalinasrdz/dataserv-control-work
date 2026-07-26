@@ -65,7 +65,7 @@ echo "  ✓ Repo actualizado: $(git log --oneline -1)"
 npm ci --omit=dev --quiet
 echo "  ✓ Dependencias instaladas"
 
-NODE_ENV=production npm run build 2>&1 | tail -5
+NODE_ENV=production npm run build
 echo "  ✓ Build completado"
 
 # Copiar archivos estáticos al directorio standalone
