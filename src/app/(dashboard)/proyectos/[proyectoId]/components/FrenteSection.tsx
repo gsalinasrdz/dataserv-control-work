@@ -10,6 +10,7 @@ interface Trabajo {
   unidad: string;
   presupuestoCantidad: string;
   presupuestoUnitario: string;
+  ejercido: string;
 }
 
 interface Props {
@@ -28,6 +29,7 @@ export function FrenteSection({ frenteId, proyectoId, clave, nombre, trabajos }:
     (sum, t) => sum + parseFloat(t.presupuestoCantidad) * parseFloat(t.presupuestoUnitario),
     0,
   );
+  const totalEjercido = trabajos.reduce((sum, t) => sum + parseFloat(t.ejercido), 0);
 
   async function handleAddTrabajo(formData: FormData) {
     startTransition(async () => {
@@ -40,6 +42,9 @@ export function FrenteSection({ frenteId, proyectoId, clave, nombre, trabajos }:
     });
   }
 
+  const fmt = (n: number) =>
+    '$' + n.toLocaleString('es-MX', { minimumFractionDigits: 2 });
+
   return (
     <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
       <div className="bg-gray-50 px-4 py-3 flex items-center justify-between border-b border-gray-200">
@@ -47,10 +52,14 @@ export function FrenteSection({ frenteId, proyectoId, clave, nombre, trabajos }:
           <span className="font-mono text-xs text-gray-500 mr-2">{clave}</span>
           <span className="font-semibold text-gray-900">{nombre}</span>
         </div>
-        <div className="flex items-center gap-4">
-          <span className="text-sm text-gray-500">
-            ${totalPresupuesto.toLocaleString('es-MX', { minimumFractionDigits: 2 })}
-          </span>
+        <div className="flex items-center gap-6 text-sm">
+          <span className="text-gray-500">Ppto: {fmt(totalPresupuesto)}</span>
+          <span className="text-blue-600">Ejercido: {fmt(totalEjercido)}</span>
+          {totalPresupuesto > 0 && (
+            <span className={totalEjercido > totalPresupuesto ? 'text-red-600 font-semibold' : 'text-green-600'}>
+              Desv: {fmt(totalPresupuesto - totalEjercido)}
+            </span>
+          )}
           <button
             onClick={() => setShowForm(!showForm)}
             className="text-xs text-blue-600 hover:text-blue-800 font-medium"
@@ -67,28 +76,26 @@ export function FrenteSection({ frenteId, proyectoId, clave, nombre, trabajos }:
               <th className="px-4 py-2 text-left w-24">Clave</th>
               <th className="px-4 py-2 text-left">Nombre</th>
               <th className="px-4 py-2 text-right w-16">Unidad</th>
-              <th className="px-4 py-2 text-right w-28">Cantidad</th>
-              <th className="px-4 py-2 text-right w-28">P.Unit.</th>
-              <th className="px-4 py-2 text-right w-32">Total</th>
+              <th className="px-4 py-2 text-right w-32">Presupuesto</th>
+              <th className="px-4 py-2 text-right w-32">Ejercido</th>
+              <th className="px-4 py-2 text-right w-32">Desviación</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-50">
             {trabajos.map((t) => {
-              const total =
+              const presupuesto =
                 parseFloat(t.presupuestoCantidad) * parseFloat(t.presupuestoUnitario);
+              const ejercido = parseFloat(t.ejercido);
+              const desviacion = presupuesto - ejercido;
               return (
                 <tr key={t.id} className="hover:bg-gray-50 text-sm">
                   <td className="px-4 py-2 font-mono text-xs text-gray-500">{t.clave}</td>
                   <td className="px-4 py-2 text-gray-900">{t.nombre}</td>
                   <td className="px-4 py-2 text-right text-gray-500">{t.unidad}</td>
-                  <td className="px-4 py-2 text-right tabular-nums">
-                    {parseFloat(t.presupuestoCantidad).toLocaleString('es-MX')}
-                  </td>
-                  <td className="px-4 py-2 text-right tabular-nums">
-                    ${parseFloat(t.presupuestoUnitario).toLocaleString('es-MX', { minimumFractionDigits: 2 })}
-                  </td>
-                  <td className="px-4 py-2 text-right tabular-nums font-medium">
-                    ${total.toLocaleString('es-MX', { minimumFractionDigits: 2 })}
+                  <td className="px-4 py-2 text-right tabular-nums">{fmt(presupuesto)}</td>
+                  <td className="px-4 py-2 text-right tabular-nums text-blue-600">{fmt(ejercido)}</td>
+                  <td className={`px-4 py-2 text-right tabular-nums font-medium ${desviacion < 0 ? 'text-red-600' : 'text-green-600'}`}>
+                    {fmt(desviacion)}
                   </td>
                 </tr>
               );
