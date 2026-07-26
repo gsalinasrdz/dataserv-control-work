@@ -1,8 +1,8 @@
 import type { NextConfig } from 'next';
 
 const config: NextConfig = {
-  experimental: { typedRoutes: true },
   output: 'standalone',
+  serverExternalPackages: ['pg'],
 };
 
 export default config;
