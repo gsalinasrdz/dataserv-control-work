@@ -62,9 +62,10 @@ cd "$REPO_DIR"
 git pull origin master
 echo "  ✓ Repo actualizado: $(git log --oneline -1)"
 
-npm ci --omit=dev --quiet
+npm ci --quiet
 echo "  ✓ Dependencias instaladas"
 
+rm -rf .next
 NODE_ENV=production npm run build
 echo "  ✓ Build completado"
 
