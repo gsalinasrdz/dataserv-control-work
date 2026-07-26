@@ -7,7 +7,7 @@ export const authConfig: NextAuthConfig = {
     jwt({ token, user }) {
       if (user) {
         token.usuarioId = user.id!;
-        token.organizacionId = (user as { organizacionId?: string }).organizacionId;
+        token.organizacionId = (user as { organizacionId?: string }).organizacionId ?? '';
       }
       return token;
     },
