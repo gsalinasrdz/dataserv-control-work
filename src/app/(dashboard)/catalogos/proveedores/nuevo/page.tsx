@@ -2,6 +2,7 @@
 
 import { useRouter } from 'next/navigation';
 import { useTransition } from 'react';
+import { toast } from 'sonner';
 import { createProveedor } from '@/lib/actions/catalogos';
 
 export default function NuevoProveedorPage() {
@@ -12,9 +13,10 @@ export default function NuevoProveedorPage() {
     startTransition(async () => {
       try {
         await createProveedor(formData);
+        toast.success('Proveedor creado');
         router.push('/catalogos/proveedores');
       } catch (err) {
-        alert(err instanceof Error ? err.message : 'Error al crear proveedor');
+        toast.error(err instanceof Error ? err.message : 'Error al crear proveedor');
       }
     });
   }

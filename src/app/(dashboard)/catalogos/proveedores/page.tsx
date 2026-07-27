@@ -1,6 +1,7 @@
 import { requireAuth } from '@/lib/auth/server';
 import { getProveedores } from '@/lib/queries/proveedores';
 import Link from 'next/link';
+import { ProveedoresTabla } from './components/ProveedoresTabla';
 
 export default async function ProveedoresPage() {
   const ctx = await requireAuth();
@@ -26,30 +27,7 @@ export default async function ProveedoresPage() {
           </Link>
         </div>
       ) : (
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
-              <tr>
-                {['Nombre', 'RFC', 'Contacto', 'Teléfono', 'Email'].map((h) => (
-                  <th key={h} className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    {h}
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-200">
-              {lista.map((p) => (
-                <tr key={p.id} className="hover:bg-gray-50 text-sm">
-                  <td className="px-4 py-3 font-medium text-gray-900">{p.nombre}</td>
-                  <td className="px-4 py-3 text-gray-500 font-mono text-xs">{p.rfc ?? '—'}</td>
-                  <td className="px-4 py-3 text-gray-500">{p.contacto ?? '—'}</td>
-                  <td className="px-4 py-3 text-gray-500">{p.telefono ?? '—'}</td>
-                  <td className="px-4 py-3 text-gray-500">{p.email ?? '—'}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+        <ProveedoresTabla proveedores={lista} />
       )}
     </div>
   );
