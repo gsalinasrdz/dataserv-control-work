@@ -42,6 +42,10 @@ const CATEGORIAS = [
   { value: 'otros', label: 'Otros' },
 ] as const;
 
+const CATEGORIA_LABEL: Record<string, string> = Object.fromEntries(
+  CATEGORIAS.map((c) => [c.value, c.label]),
+);
+
 export function ConceptoRow({
   concepto,
   trabajos,
@@ -178,17 +182,23 @@ export function ConceptoRow({
 
       {concepto.asignaciones.length > 0 && (
         <div className="px-4 pb-2 space-y-1">
-          {concepto.asignaciones.map((a) => (
-            <div key={a.id} className="flex items-center gap-2 text-xs text-gray-500 pl-2 border-l-2 border-green-200">
-              <span className="font-mono">{a.trabajoId.substring(0, 8)}…</span>
-              <span>{a.categoria}</span>
-              <span className="tabular-nums font-medium text-green-700">
-                ${parseFloat(a.importe).toLocaleString('es-MX', { minimumFractionDigits: 2 })}
-              </span>
-              <span>{a.fechaDevengo}</span>
-              {a.estado === 'cancelada' && <span className="text-red-500 line-through">cancelada</span>}
-            </div>
-          ))}
+          {concepto.asignaciones.map((a) => {
+            const trabajo = trabajos.find((t) => t.id === a.trabajoId);
+            const trabajoLabel = trabajo
+              ? `${trabajo.proyectoNombre ?? ''} › ${trabajo.frenteNombre ?? ''} › ${trabajo.clave}`
+              : a.trabajoId.substring(0, 8) + '…';
+            return (
+              <div key={a.id} className="flex items-center gap-2 text-xs text-gray-500 pl-2 border-l-2 border-green-200">
+                <span className="max-w-52 truncate" title={trabajoLabel}>{trabajoLabel}</span>
+                <span>{CATEGORIA_LABEL[a.categoria] ?? a.categoria}</span>
+                <span className="tabular-nums font-medium text-green-700">
+                  ${parseFloat(a.importe).toLocaleString('es-MX', { minimumFractionDigits: 2 })}
+                </span>
+                <span>{a.fechaDevengo}</span>
+                {a.estado === 'cancelada' && <span className="text-red-500 line-through">cancelada</span>}
+              </div>
+            );
+          })}
         </div>
       )}
     </div>

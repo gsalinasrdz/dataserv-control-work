@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useTransition } from 'react';
+import { toast } from 'sonner';
 import { createTrabajo } from '@/lib/actions/trabajos';
 
 interface Trabajo {
@@ -30,14 +31,19 @@ export function FrenteSection({ frenteId, proyectoId, clave, nombre, trabajos }:
     0,
   );
   const totalEjercido = trabajos.reduce((sum, t) => sum + parseFloat(t.ejercido), 0);
+  const pct = totalPresupuesto > 0
+    ? Math.min(100, (totalEjercido / totalPresupuesto) * 100)
+    : 0;
+  const sobreEjercido = totalEjercido > totalPresupuesto;
 
   async function handleAddTrabajo(formData: FormData) {
     startTransition(async () => {
       try {
         await createTrabajo(proyectoId, frenteId, formData);
         setShowForm(false);
+        toast.success('Trabajo agregado');
       } catch (err) {
-        alert(err instanceof Error ? err.message : 'Error al agregar trabajo');
+        toast.error(err instanceof Error ? err.message : 'Error al agregar trabajo');
       }
     });
   }
@@ -47,6 +53,7 @@ export function FrenteSection({ frenteId, proyectoId, clave, nombre, trabajos }:
 
   return (
     <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+      {/* Header */}
       <div className="bg-gray-50 px-4 py-3 flex items-center justify-between border-b border-gray-200">
         <div>
           <span className="font-mono text-xs text-gray-500 mr-2">{clave}</span>
@@ -56,7 +63,7 @@ export function FrenteSection({ frenteId, proyectoId, clave, nombre, trabajos }:
           <span className="text-gray-500">Ppto: {fmt(totalPresupuesto)}</span>
           <span className="text-blue-600">Ejercido: {fmt(totalEjercido)}</span>
           {totalPresupuesto > 0 && (
-            <span className={totalEjercido > totalPresupuesto ? 'text-red-600 font-semibold' : 'text-green-600'}>
+            <span className={sobreEjercido ? 'text-red-600 font-semibold' : 'text-green-600'}>
               Desv: {fmt(totalPresupuesto - totalEjercido)}
             </span>
           )}
@@ -68,6 +75,16 @@ export function FrenteSection({ frenteId, proyectoId, clave, nombre, trabajos }:
           </button>
         </div>
       </div>
+
+      {/* Barra de progreso presupuestal */}
+      {totalPresupuesto > 0 && (
+        <div className="h-1.5 bg-gray-100 w-full">
+          <div
+            className={`h-full transition-all duration-300 ${sobreEjercido ? 'bg-red-500' : 'bg-blue-500'}`}
+            style={{ width: `${pct}%` }}
+          />
+        </div>
+      )}
 
       {trabajos.length > 0 && (
         <table className="min-w-full divide-y divide-gray-100">
@@ -94,7 +111,11 @@ export function FrenteSection({ frenteId, proyectoId, clave, nombre, trabajos }:
                   <td className="px-4 py-2 text-right text-gray-500">{t.unidad}</td>
                   <td className="px-4 py-2 text-right tabular-nums">{fmt(presupuesto)}</td>
                   <td className="px-4 py-2 text-right tabular-nums text-blue-600">{fmt(ejercido)}</td>
-                  <td className={`px-4 py-2 text-right tabular-nums font-medium ${desviacion < 0 ? 'text-red-600' : 'text-green-600'}`}>
+                  <td
+                    className={`px-4 py-2 text-right tabular-nums font-medium ${
+                      desviacion < 0 ? 'text-red-600' : 'text-green-600'
+                    }`}
+                  >
                     {fmt(desviacion)}
                   </td>
                 </tr>
@@ -105,23 +126,58 @@ export function FrenteSection({ frenteId, proyectoId, clave, nombre, trabajos }:
       )}
 
       {showForm && (
-        <form action={handleAddTrabajo} className="p-4 border-t border-gray-100 bg-blue-50 flex gap-2 flex-wrap">
-          <input name="clave" required placeholder="EST-001" className="border rounded px-2 py-1 text-xs font-mono w-24 uppercase" />
-          <input name="nombre" required placeholder="Nombre del trabajo" className="border rounded px-2 py-1 text-xs flex-1 min-w-36" />
+        <form
+          action={handleAddTrabajo}
+          className="p-4 border-t border-gray-100 bg-blue-50 flex gap-2 flex-wrap"
+        >
+          <input
+            name="clave"
+            required
+            placeholder="EST-001"
+            className="border rounded px-2 py-1 text-xs font-mono w-24 uppercase"
+          />
+          <input
+            name="nombre"
+            required
+            placeholder="Nombre del trabajo"
+            className="border rounded px-2 py-1 text-xs flex-1 min-w-36"
+          />
           <input name="unidad" required placeholder="m2" className="border rounded px-2 py-1 text-xs w-16" />
-          <input name="cantidad" type="number" step="0.0001" defaultValue="0" className="border rounded px-2 py-1 text-xs w-24 text-right" />
-          <input name="precio_unitario" type="number" step="0.0001" defaultValue="0" className="border rounded px-2 py-1 text-xs w-24 text-right" />
-          <button type="submit" disabled={pending} className="bg-blue-600 text-white px-3 py-1 rounded text-xs font-medium disabled:opacity-50">
-            {pending ? '...' : 'Agregar'}
+          <input
+            name="cantidad"
+            type="number"
+            step="0.0001"
+            defaultValue="0"
+            className="border rounded px-2 py-1 text-xs w-24 text-right"
+          />
+          <input
+            name="precio_unitario"
+            type="number"
+            step="0.0001"
+            defaultValue="0"
+            className="border rounded px-2 py-1 text-xs w-24 text-right"
+          />
+          <button
+            type="submit"
+            disabled={pending}
+            className="bg-blue-600 text-white px-3 py-1 rounded text-xs font-medium disabled:opacity-50"
+          >
+            {pending ? '…' : 'Agregar'}
           </button>
-          <button type="button" onClick={() => setShowForm(false)} className="text-xs text-gray-500 px-2">
+          <button
+            type="button"
+            onClick={() => setShowForm(false)}
+            className="text-xs text-gray-500 px-2"
+          >
             Cancelar
           </button>
         </form>
       )}
 
       {trabajos.length === 0 && !showForm && (
-        <p className="px-4 py-3 text-xs text-gray-400">Sin trabajos. Agrega uno o usa el importador CSV.</p>
+        <p className="px-4 py-3 text-xs text-gray-400">
+          Sin trabajos. Agrega uno o usa el importador CSV.
+        </p>
       )}
     </div>
   );
