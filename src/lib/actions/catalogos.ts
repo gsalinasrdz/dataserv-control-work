@@ -83,3 +83,30 @@ export async function deleteProveedor(proveedorId: string) {
   });
   revalidatePath('/catalogos/proveedores');
 }
+
+export async function updateMaterial(materialId: string, formData: FormData) {
+  const ctx = await requireAuth();
+  const nombre = (formData.get('nombre') as string)?.trim();
+  const clave = (formData.get('clave') as string)?.trim().toUpperCase();
+  const unidad = (formData.get('unidad') as string)?.trim();
+  const descripcion = (formData.get('descripcion') as string)?.trim() || null;
+  if (!nombre) throw new Error('nombre requerido');
+  if (!clave) throw new Error('clave requerida');
+  if (!unidad) throw new Error('unidad requerida');
+  await withUserContext(ctx, async (tx) => {
+    await tx
+      .update(materiales)
+      .set({ nombre, clave, unidad, descripcion, updatedAt: new Date() })
+      .where(eq(materiales.id, materialId));
+  });
+  revalidatePath('/catalogos/materiales');
+  revalidatePath(`/catalogos/materiales/${materialId}`);
+}
+
+export async function deleteMaterial(materialId: string) {
+  const ctx = await requireAuth();
+  await withUserContext(ctx, async (tx) => {
+    await tx.delete(materiales).where(eq(materiales.id, materialId));
+  });
+  revalidatePath('/catalogos/materiales');
+}

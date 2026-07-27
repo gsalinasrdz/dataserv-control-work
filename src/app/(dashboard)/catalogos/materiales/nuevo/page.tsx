@@ -2,6 +2,7 @@
 
 import { useRouter } from 'next/navigation';
 import { useTransition } from 'react';
+import { toast } from 'sonner';
 import { createMaterial } from '@/lib/actions/catalogos';
 
 export default function NuevoMaterialPage() {
@@ -12,9 +13,10 @@ export default function NuevoMaterialPage() {
     startTransition(async () => {
       try {
         await createMaterial(formData);
+        toast.success('Material creado');
         router.push('/catalogos/materiales');
       } catch (err) {
-        alert(err instanceof Error ? err.message : 'Error al crear material');
+        toast.error(err instanceof Error ? err.message : 'Error al crear material');
       }
     });
   }
