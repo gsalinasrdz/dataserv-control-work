@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from 'react';
 import { toast } from 'sonner';
-import { createTrabajo } from '@/lib/actions/trabajos';
+import { createTrabajo, updateTrabajo, deleteTrabajo } from '@/lib/actions/trabajos';
 
 interface Trabajo {
   id: string;
@@ -26,6 +26,17 @@ export function FrenteSection({ frenteId, proyectoId, clave, nombre, trabajos }:
   const [showForm, setShowForm] = useState(false);
   const [pending, startTransition] = useTransition();
 
+  // Edit inline state
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editData, setEditData] = useState<{
+    nombre: string;
+    unidad: string;
+    cantidad: string;
+    precio_unitario: string;
+  }>({ nombre: '', unidad: '', cantidad: '', precio_unitario: '' });
+  const [saving, startSave] = useTransition();
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+
   const totalPresupuesto = trabajos.reduce(
     (sum, t) => sum + parseFloat(t.presupuestoCantidad) * parseFloat(t.presupuestoUnitario),
     0,
@@ -46,6 +57,46 @@ export function FrenteSection({ frenteId, proyectoId, clave, nombre, trabajos }:
         toast.error(err instanceof Error ? err.message : 'Error al agregar trabajo');
       }
     });
+  }
+
+  function startEdit(t: Trabajo) {
+    setEditingId(t.id);
+    setEditData({
+      nombre: t.nombre,
+      unidad: t.unidad,
+      cantidad: t.presupuestoCantidad,
+      precio_unitario: t.presupuestoUnitario,
+    });
+  }
+
+  async function handleSave(t: Trabajo) {
+    startSave(async () => {
+      try {
+        await updateTrabajo(t.id, proyectoId, {
+          nombre: editData.nombre,
+          unidad: editData.unidad,
+          presupuestoCantidad: editData.cantidad,
+          presupuestoUnitario: editData.precio_unitario,
+        });
+        setEditingId(null);
+        toast.success('Trabajo actualizado');
+      } catch (err) {
+        toast.error(err instanceof Error ? err.message : 'Error al actualizar');
+      }
+    });
+  }
+
+  async function handleDelete(t: Trabajo) {
+    if (!window.confirm(`¿Eliminar el trabajo "${t.nombre}"? Esta acción no se puede deshacer.`)) return;
+    setDeletingId(t.id);
+    try {
+      await deleteTrabajo(t.id, proyectoId);
+      toast.success('Trabajo eliminado');
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Error al eliminar');
+    } finally {
+      setDeletingId(null);
+    }
   }
 
   const fmt = (n: number) =>
@@ -96,6 +147,7 @@ export function FrenteSection({ frenteId, proyectoId, clave, nombre, trabajos }:
               <th className="px-4 py-2 text-right w-32">Presupuesto</th>
               <th className="px-4 py-2 text-right w-32">Ejercido</th>
               <th className="px-4 py-2 text-right w-32">Desviación</th>
+              <th className="px-4 py-2 text-right w-24">Acciones</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-50">
@@ -104,8 +156,78 @@ export function FrenteSection({ frenteId, proyectoId, clave, nombre, trabajos }:
                 parseFloat(t.presupuestoCantidad) * parseFloat(t.presupuestoUnitario);
               const ejercido = parseFloat(t.ejercido);
               const desviacion = presupuesto - ejercido;
+
+              if (editingId === t.id) {
+                return (
+                  <tr key={t.id} className="bg-blue-50 text-sm">
+                    <td className="px-4 py-2">
+                      <input
+                        value={t.clave}
+                        readOnly
+                        className="border rounded px-1.5 py-1 text-xs font-mono w-20 bg-gray-100 text-gray-500"
+                      />
+                    </td>
+                    <td className="px-4 py-2">
+                      <input
+                        value={editData.nombre}
+                        onChange={(e) => setEditData({ ...editData, nombre: e.target.value })}
+                        className="border rounded px-1.5 py-1 text-xs w-full min-w-32"
+                      />
+                    </td>
+                    <td className="px-4 py-2 text-right">
+                      <input
+                        value={editData.unidad}
+                        onChange={(e) => setEditData({ ...editData, unidad: e.target.value })}
+                        className="border rounded px-1.5 py-1 text-xs w-14 text-right"
+                      />
+                    </td>
+                    <td className="px-4 py-2">
+                      <div className="space-y-1">
+                        <input
+                          type="number"
+                          step="0.0001"
+                          value={editData.cantidad}
+                          onChange={(e) => setEditData({ ...editData, cantidad: e.target.value })}
+                          placeholder="cant."
+                          className="border rounded px-1.5 py-1 text-xs w-24 text-right block"
+                        />
+                        <input
+                          type="number"
+                          step="0.0001"
+                          value={editData.precio_unitario}
+                          onChange={(e) => setEditData({ ...editData, precio_unitario: e.target.value })}
+                          placeholder="p.u."
+                          className="border rounded px-1.5 py-1 text-xs w-24 text-right block"
+                        />
+                      </div>
+                    </td>
+                    <td className="px-4 py-2 text-right text-blue-600 tabular-nums">
+                      {fmt(ejercido)}
+                    </td>
+                    <td className="px-4 py-2 text-right tabular-nums text-gray-400">—</td>
+                    <td className="px-4 py-2 text-right">
+                      <div className="flex justify-end gap-2">
+                        <button
+                          onClick={() => handleSave(t)}
+                          disabled={saving}
+                          className="text-xs bg-blue-600 text-white px-2 py-1 rounded font-medium disabled:opacity-50"
+                        >
+                          {saving ? '…' : 'Guardar'}
+                        </button>
+                        <button
+                          onClick={() => setEditingId(null)}
+                          className="text-xs text-gray-500 px-2 py-1"
+                        >
+                          Cancelar
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                );
+              }
+
               return (
-                <tr key={t.id} className="hover:bg-gray-50 text-sm">
+                <tr key={t.id} className="hover:bg-gray-50 text-sm group">
                   <td className="px-4 py-2 font-mono text-xs text-gray-500">{t.clave}</td>
                   <td className="px-4 py-2 text-gray-900">{t.nombre}</td>
                   <td className="px-4 py-2 text-right text-gray-500">{t.unidad}</td>
@@ -117,6 +239,23 @@ export function FrenteSection({ frenteId, proyectoId, clave, nombre, trabajos }:
                     }`}
                   >
                     {fmt(desviacion)}
+                  </td>
+                  <td className="px-4 py-2 text-right">
+                    <div className="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <button
+                        onClick={() => startEdit(t)}
+                        className="text-xs text-blue-600 hover:text-blue-800 font-medium"
+                      >
+                        Editar
+                      </button>
+                      <button
+                        onClick={() => handleDelete(t)}
+                        disabled={deletingId === t.id}
+                        className="text-xs text-red-500 hover:text-red-700 disabled:opacity-50"
+                      >
+                        {deletingId === t.id ? '…' : '✕'}
+                      </button>
+                    </div>
                   </td>
                 </tr>
               );

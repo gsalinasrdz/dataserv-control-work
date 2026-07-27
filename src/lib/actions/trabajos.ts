@@ -61,3 +61,11 @@ export async function updateTrabajo(
 
   revalidatePath(`/proyectos/${proyectoId}`);
 }
+
+export async function deleteTrabajo(trabajoId: string, proyectoId: string) {
+  const ctx = await requireAuth();
+  await withUserContext(ctx, async (tx) => {
+    await tx.delete(trabajos).where(eq(trabajos.id, trabajoId));
+  });
+  revalidatePath(`/proyectos/${proyectoId}`);
+}
