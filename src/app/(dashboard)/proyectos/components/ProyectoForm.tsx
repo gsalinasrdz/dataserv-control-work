@@ -2,6 +2,7 @@
 
 import { useRouter } from 'next/navigation';
 import { useTransition } from 'react';
+import { toast } from 'sonner';
 import { createProyecto } from '@/lib/actions/proyectos';
 
 export function ProyectoForm() {
@@ -12,9 +13,10 @@ export function ProyectoForm() {
     startTransition(async () => {
       try {
         await createProyecto(formData);
+        toast.success('Proyecto creado');
         router.push('/proyectos');
       } catch (err) {
-        alert(err instanceof Error ? err.message : 'Error al crear proyecto');
+        toast.error(err instanceof Error ? err.message : 'Error al crear proyecto');
       }
     });
   }

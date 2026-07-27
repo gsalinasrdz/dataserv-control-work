@@ -51,3 +51,22 @@ export async function updateProyectoEstado(
   revalidatePath(`/proyectos/${proyectoId}`);
   revalidatePath('/proyectos');
 }
+
+export async function updateProyecto(proyectoId: string, formData: FormData) {
+  const ctx = await requireAuth();
+  const nombre = (formData.get('nombre') as string)?.trim();
+  const clave = (formData.get('clave') as string)?.trim().toUpperCase();
+  const descripcion = (formData.get('descripcion') as string)?.trim() || null;
+  const fechaInicio = (formData.get('fecha_inicio') as string) || undefined;
+  const fechaFinEstimada = (formData.get('fecha_fin_estimada') as string) || undefined;
+  if (!nombre) throw new Error('nombre requerido');
+  if (!clave) throw new Error('clave requerida');
+  await withUserContext(ctx, async (tx) => {
+    await tx
+      .update(proyectos)
+      .set({ nombre, clave, descripcion, fechaInicio, fechaFinEstimada, updatedAt: new Date() })
+      .where(eq(proyectos.id, proyectoId));
+  });
+  revalidatePath(`/proyectos/${proyectoId}`);
+  revalidatePath('/proyectos');
+}

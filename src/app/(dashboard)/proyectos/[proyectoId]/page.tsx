@@ -30,6 +30,10 @@ export default async function ProyectoDetailPage({
     0,
   );
 
+  const totalEjercido = frentesData
+    .flatMap((f) => f.trabajos)
+    .reduce((s, t) => s + parseFloat(t.ejercido), 0);
+
   async function handleCreateFrente(formData: FormData) {
     'use server';
     await createFrente(proyectoId, formData);
@@ -51,6 +55,9 @@ export default async function ProyectoDetailPage({
           <div className="text-xl font-bold text-gray-900 tabular-nums">
             ${totalPresupuesto.toLocaleString('es-MX', { minimumFractionDigits: 2 })}
           </div>
+          <div className="text-xs text-blue-600 tabular-nums">
+            Ejercido: ${totalEjercido.toLocaleString('es-MX', { minimumFractionDigits: 2 })}
+          </div>
         </div>
       </div>
 
@@ -60,6 +67,12 @@ export default async function ProyectoDetailPage({
           className="text-sm text-blue-600 hover:text-blue-800 border border-blue-200 px-3 py-1.5 rounded-md hover:bg-blue-50"
         >
           Importar CSV
+        </Link>
+        <Link
+          href={`/proyectos/${proyectoId}/editar`}
+          className="text-sm text-gray-600 hover:text-gray-900 border border-gray-200 px-3 py-1.5 rounded-md hover:bg-gray-50"
+        >
+          Editar proyecto
         </Link>
       </div>
 
