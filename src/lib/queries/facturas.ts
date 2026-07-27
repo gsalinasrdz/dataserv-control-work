@@ -1,5 +1,5 @@
 import { withUserContext, type UserContext } from '@/lib/db/context';
-import { facturas, facturaConceptos, asignaciones } from '@/lib/db/schema';
+import { facturas, facturaConceptos, asignaciones, trabajos } from '@/lib/db/schema';
 import { eq, desc, inArray, and } from 'drizzle-orm';
 
 export async function getFacturas(ctx: UserContext) {
@@ -47,12 +47,15 @@ export async function getFacturaConDetalles(ctx: UserContext, facturaId: string)
         id: asignaciones.id,
         facturaConceptoId: asignaciones.facturaConceptoId,
         trabajoId: asignaciones.trabajoId,
+        trabajoClave: trabajos.clave,
+        trabajoNombre: trabajos.nombre,
         importe: asignaciones.importe,
         categoria: asignaciones.categoria,
         fechaDevengo: asignaciones.fechaDevengo,
         estado: asignaciones.estado,
       })
       .from(asignaciones)
+      .leftJoin(trabajos, eq(asignaciones.trabajoId, trabajos.id))
       .where(
         and(
           inArray(

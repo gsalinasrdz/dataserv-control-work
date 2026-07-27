@@ -6,6 +6,8 @@ import { asignarConcepto } from '@/lib/actions/asignaciones';
 interface Asignacion {
   id: string;
   trabajoId: string;
+  trabajoClave: string | null;
+  trabajoNombre: string | null;
   importe: string;
   categoria: string;
   fechaDevengo: string;
@@ -183,13 +185,11 @@ export function ConceptoRow({
       {concepto.asignaciones.length > 0 && (
         <div className="px-4 pb-2 space-y-1">
           {concepto.asignaciones.map((a) => {
-            const trabajo = trabajos.find((t) => t.id === a.trabajoId);
-            const trabajoLabel = trabajo
-              ? `${trabajo.proyectoNombre ?? ''} › ${trabajo.frenteNombre ?? ''} › ${trabajo.clave}`
-              : a.trabajoId.substring(0, 8) + '…';
             return (
               <div key={a.id} className="flex items-center gap-2 text-xs text-gray-500 pl-2 border-l-2 border-green-200">
-                <span className="max-w-52 truncate" title={trabajoLabel}>{trabajoLabel}</span>
+                <span className="font-mono font-medium text-gray-700">{a.trabajoClave ?? '—'}</span>
+                <span className="text-gray-300">·</span>
+                <span className="text-gray-600">{a.trabajoNombre ?? '—'}</span>
                 <span>{CATEGORIA_LABEL[a.categoria] ?? a.categoria}</span>
                 <span className="tabular-nums font-medium text-green-700">
                   ${parseFloat(a.importe).toLocaleString('es-MX', { minimumFractionDigits: 2 })}

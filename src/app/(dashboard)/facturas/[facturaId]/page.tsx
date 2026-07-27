@@ -24,6 +24,8 @@ export default async function FacturaDetailPage({
     asignaciones: {
       id: string;
       trabajoId: string;
+      trabajoClave: string | null;
+      trabajoNombre: string | null;
       importe: string;
       categoria: string;
       fechaDevengo: string;
