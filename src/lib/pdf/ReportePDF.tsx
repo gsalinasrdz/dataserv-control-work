@@ -100,11 +100,11 @@ export function ReportePDF({ proyecto, grupos, fecha }: Props) {
           <Text style={s.colImporte}>Importe</Text>
         </View>
 
-        {grupos.map((grupo, gi) => (
-          <View key={gi}>
+        {grupos.map((grupo) => (
+          <View key={grupo.label}>
             <Text style={s.sectionTitle}>{grupo.label.toUpperCase()}</Text>
-            {grupo.conceptos.map((c, ci) => (
-              <View key={ci} style={s.row}>
+            {grupo.conceptos.map((c) => (
+              <View key={c.asignacionId} style={s.row}>
                 <Text style={s.colClave}>{c.claveProdServ ?? '—'}</Text>
                 <Text style={s.colDesc}>{c.descripcion}</Text>
                 <Text style={s.colCat}>{CATEGORIA_LABEL[c.categoria] ?? c.categoria}</Text>

@@ -27,7 +27,8 @@ export async function POST(
     const body = (await request.json()) as RequestBody;
     const grupos = groupConceptos(body.conceptos, body.agrupacion);
 
-    const fecha = new Date().toLocaleDateString('es-MX', {
+    const now = new Date();
+    const fecha = now.toLocaleDateString('es-MX', {
       day: '2-digit',
       month: '2-digit',
       year: 'numeric',
@@ -44,7 +45,7 @@ export async function POST(
     return new NextResponse(new Uint8Array(buffer), {
       headers: {
         'Content-Type': 'application/pdf',
-        'Content-Disposition': `attachment; filename="reporte-${proyecto.clave}-${new Date().toISOString().split('T')[0]}.pdf"`,
+        'Content-Disposition': `attachment; filename="reporte-${proyecto.clave.replace(/[^a-zA-Z0-9_-]/g, '_')}-${now.toISOString().split('T')[0]}.pdf"`,
       },
     });
   } catch (err) {
