@@ -95,7 +95,7 @@ export function ReporteEditor({ conceptosIniciales, proyectoId }: Props) {
         a.href = url;
         a.download = `reporte-${proyectoId}-${new Date().toISOString().split('T')[0]}.pdf`;
         a.click();
-        URL.revokeObjectURL(url);
+        setTimeout(() => URL.revokeObjectURL(url), 100);
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Error al exportar');
       }
