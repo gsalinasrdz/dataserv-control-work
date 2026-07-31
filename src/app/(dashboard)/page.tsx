@@ -43,6 +43,11 @@ export default async function DashboardPage() {
         <div className="bg-white rounded-lg border border-gray-200 p-5">
           <div className="text-xs text-gray-400 uppercase tracking-wide mb-1">Proyectos activos</div>
           <div className="text-3xl font-bold text-gray-900">{resumen.proyectosActivos}</div>
+          {resumen.proyectosEnRiesgo > 0 && (
+            <div className="text-xs text-orange-600 font-medium mt-1">
+              ⚠ {resumen.proyectosEnRiesgo} en riesgo presupuestal (&gt;85%)
+            </div>
+          )}
           <Link href="/proyectos" className="text-xs text-blue-600 hover:underline mt-1 block">
             Ver proyectos →
           </Link>
