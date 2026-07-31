@@ -2,14 +2,8 @@ import { auth, signOut } from '@/auth';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
 import { NavLink } from './components/NavLink';
+import { CatalogosDropdown } from './components/CatalogosDropdown';
 import { Toaster } from 'sonner';
-
-const NAV_LINKS = [
-  { href: '/proyectos', label: 'Proyectos' },
-  { href: '/facturas', label: 'Facturas' },
-  { href: '/catalogos/proveedores', label: 'Proveedores' },
-  { href: '/catalogos/materiales', label: 'Materiales' },
-] as const;
 
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
   const session = await auth();
@@ -24,11 +18,9 @@ export default async function DashboardLayout({ children }: { children: React.Re
               OpsCore
             </Link>
             <div className="hidden sm:flex items-center gap-6">
-              {NAV_LINKS.map((link) => (
-                <NavLink key={link.href} href={link.href}>
-                  {link.label}
-                </NavLink>
-              ))}
+              <NavLink href="/proyectos">Proyectos</NavLink>
+              <NavLink href="/facturas">Facturas</NavLink>
+              <CatalogosDropdown />
             </div>
           </div>
           <div className="flex items-center gap-4">
@@ -51,11 +43,10 @@ export default async function DashboardLayout({ children }: { children: React.Re
           </div>
         </div>
         <div className="sm:hidden border-t border-gray-100 px-4 py-2 flex gap-4 overflow-x-auto">
-          {NAV_LINKS.map((link) => (
-            <NavLink key={link.href} href={link.href}>
-              {link.label}
-            </NavLink>
-          ))}
+          <NavLink href="/proyectos">Proyectos</NavLink>
+          <NavLink href="/facturas">Facturas</NavLink>
+          <NavLink href="/catalogos/proveedores">Proveedores</NavLink>
+          <NavLink href="/catalogos/materiales">Materiales</NavLink>
         </div>
       </nav>
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">{children}</main>
