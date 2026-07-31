@@ -56,7 +56,7 @@ export async function getResumenDashboard(ctx: UserContext) {
         FROM proyectos p
         LEFT JOIN frentes f ON f.proyecto_id = p.id
         LEFT JOIN trabajos t ON t.frente_id = f.id
-        LEFT JOIN movimientos_costo mc ON mc.proyecto_id = p.id
+        LEFT JOIN movimientos_costo mc ON mc.trabajo_id = t.id
         WHERE p.estado = 'activo'
         GROUP BY p.id
         HAVING
