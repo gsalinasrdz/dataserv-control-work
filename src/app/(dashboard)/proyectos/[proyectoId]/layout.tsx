@@ -26,10 +26,11 @@ export default async function ProyectoLayout({
   const resumen = await getResumenProyecto(ctx, proyectoId);
   if (!resumen) notFound();
 
-  const pct =
+  const rawPct =
     resumen.presupuestoTotal > 0
-      ? Math.min(100, (resumen.ejercidoTotal / resumen.presupuestoTotal) * 100)
+      ? (resumen.ejercidoTotal / resumen.presupuestoTotal) * 100
       : 0;
+  const pct = Math.min(100, rawPct);
   const disponible = resumen.presupuestoTotal - resumen.ejercidoTotal;
 
   return (
@@ -93,7 +94,7 @@ export default async function ProyectoLayout({
         {/* Barra de progreso global */}
         <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
           <div
-            className={`h-full rounded-full transition-all duration-300 ${barColor(pct)}`}
+            className={`h-full rounded-full transition-all duration-300 ${barColor(rawPct)}`}
             style={{ width: `${Math.min(100, pct)}%` }}
           />
         </div>
