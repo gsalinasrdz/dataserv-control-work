@@ -1,38 +1,17 @@
 import { requireAuth } from '@/lib/auth/server';
-import { getProyecto } from '@/lib/queries/proyectos';
 import { getFrentesConTrabajos } from '@/lib/queries/frentes';
 import { FrenteSection } from './components/FrenteSection';
-import Link from 'next/link';
-import { notFound } from 'next/navigation';
 import { createFrente } from '@/lib/actions/frentes';
+import Link from 'next/link';
 
-export default async function ProyectoDetailPage({
+export default async function ProyectoTrabajosPage({
   params,
 }: {
   params: Promise<{ proyectoId: string }>;
 }) {
   const { proyectoId } = await params;
   const ctx = await requireAuth();
-  const [proyecto, frentesData] = await Promise.all([
-    getProyecto(ctx, proyectoId),
-    getFrentesConTrabajos(ctx, proyectoId),
-  ]);
-
-  if (!proyecto) notFound();
-
-  const totalPresupuesto = frentesData.reduce(
-    (sum, f) =>
-      sum +
-      f.trabajos.reduce(
-        (s, t) => s + parseFloat(t.presupuestoCantidad) * parseFloat(t.presupuestoUnitario),
-        0,
-      ),
-    0,
-  );
-
-  const totalEjercido = frentesData
-    .flatMap((f) => f.trabajos)
-    .reduce((s, t) => s + parseFloat(t.ejercido), 0);
+  const frentesData = await getFrentesConTrabajos(ctx, proyectoId);
 
   async function handleCreateFrente(formData: FormData) {
     'use server';
@@ -40,59 +19,30 @@ export default async function ProyectoDetailPage({
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <div className="flex items-center gap-2 text-sm text-gray-500 mb-1">
-            <Link href="/proyectos" className="hover:text-gray-700">Proyectos</Link>
-            <span>/</span>
-            <span className="font-mono">{proyecto.clave}</span>
-          </div>
-          <h1 className="text-2xl font-bold text-gray-900">{proyecto.nombre}</h1>
-        </div>
-        <div className="text-right">
-          <div className="text-xs text-gray-500 uppercase tracking-wide">Presupuesto total</div>
-          <div className="text-xl font-bold text-gray-900 tabular-nums">
-            ${totalPresupuesto.toLocaleString('es-MX', { minimumFractionDigits: 2 })}
-          </div>
-          <div className="text-xs text-blue-600 tabular-nums">
-            Ejercido: ${totalEjercido.toLocaleString('es-MX', { minimumFractionDigits: 2 })}
-          </div>
-        </div>
-      </div>
-
-      <div className="flex gap-3">
-        <Link
-          href={`/proyectos/${proyectoId}/importar`}
-          className="text-sm text-blue-600 hover:text-blue-800 border border-blue-200 px-3 py-1.5 rounded-md hover:bg-blue-50"
-        >
-          Importar CSV
-        </Link>
-        <Link
-          href={`/proyectos/${proyectoId}/editar`}
-          className="text-sm text-gray-600 hover:text-gray-900 border border-gray-200 px-3 py-1.5 rounded-md hover:bg-gray-50"
-        >
-          Editar proyecto
-        </Link>
-      </div>
-
+    <div className="space-y-4">
       {frentesData.length === 0 ? (
-        <div className="bg-white border border-gray-200 rounded-lg p-8 text-center text-gray-500 text-sm">
-          Sin frentes de trabajo. Agrega uno abajo o usa el importador CSV.
+        <div className="bg-white border border-gray-200 rounded-lg p-8 text-center">
+          <p className="text-gray-500 text-sm mb-3">
+            Sin frentes de trabajo. Puedes agregar uno abajo o importar partidas desde CSV.
+          </p>
+          <Link
+            href={`/proyectos/${proyectoId}/importar`}
+            className="text-sm text-blue-600 hover:text-blue-800 border border-blue-200 px-3 py-1.5 rounded-md hover:bg-blue-50"
+          >
+            Importar CSV
+          </Link>
         </div>
       ) : (
-        <div className="space-y-4">
-          {frentesData.map((f) => (
-            <FrenteSection
-              key={f.id}
-              frenteId={f.id}
-              proyectoId={proyectoId}
-              clave={f.clave}
-              nombre={f.nombre}
-              trabajos={f.trabajos}
-            />
-          ))}
-        </div>
+        frentesData.map((f) => (
+          <FrenteSection
+            key={f.id}
+            frenteId={f.id}
+            proyectoId={proyectoId}
+            clave={f.clave}
+            nombre={f.nombre}
+            trabajos={f.trabajos}
+          />
+        ))
       )}
 
       <div className="bg-white rounded-lg border border-gray-200 p-4">
@@ -100,17 +50,35 @@ export default async function ProyectoDetailPage({
         <form action={handleCreateFrente} className="flex gap-3 items-end flex-wrap">
           <div>
             <label className="block text-xs text-gray-500 mb-1">Clave</label>
-            <input name="clave" required placeholder="EST" className="border rounded px-2 py-1.5 text-sm font-mono w-24 uppercase" />
+            <input
+              name="clave"
+              required
+              placeholder="EST"
+              className="border rounded px-2 py-1.5 text-sm font-mono w-24 uppercase"
+            />
           </div>
           <div>
             <label className="block text-xs text-gray-500 mb-1">Nombre</label>
-            <input name="nombre" required placeholder="Estructura" className="border rounded px-2 py-1.5 text-sm w-48" />
+            <input
+              name="nombre"
+              required
+              placeholder="Estructura"
+              className="border rounded px-2 py-1.5 text-sm w-48"
+            />
           </div>
           <div>
             <label className="block text-xs text-gray-500 mb-1">Orden</label>
-            <input name="orden" type="number" defaultValue="0" className="border rounded px-2 py-1.5 text-sm w-16 text-right" />
+            <input
+              name="orden"
+              type="number"
+              defaultValue="0"
+              className="border rounded px-2 py-1.5 text-sm w-16 text-right"
+            />
           </div>
-          <button type="submit" className="bg-gray-800 text-white px-4 py-1.5 rounded text-sm font-medium hover:bg-gray-700">
+          <button
+            type="submit"
+            className="bg-gray-800 text-white px-4 py-1.5 rounded text-sm font-medium hover:bg-gray-700"
+          >
             Agregar frente
           </button>
         </form>
