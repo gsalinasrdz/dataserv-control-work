@@ -21,10 +21,16 @@ export function CatalogosDropdown() {
     return () => document.removeEventListener('mousedown', handleOutsideClick);
   }, []);
 
+  useEffect(() => {
+    setOpen(false);
+  }, [pathname]);
+
   return (
     <div ref={ref} className="relative">
       <button
         onClick={() => setOpen(!open)}
+        aria-haspopup="true"
+        aria-expanded={open}
         className={cn(
           'text-sm transition-colors flex items-center gap-1',
           isActive
