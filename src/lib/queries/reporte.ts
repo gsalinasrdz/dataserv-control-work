@@ -53,7 +53,7 @@ export function groupConceptos(
       {
         label: 'Todos los conceptos',
         conceptos,
-        subtotal: conceptos.reduce((s, c) => s + parseFloat(c.importe), 0),
+        subtotal: conceptos.reduce((s, c) => s + (Number(c.importe) || 0), 0),
       },
     ];
   }
@@ -73,6 +73,6 @@ export function groupConceptos(
   return Array.from(grupos.entries()).map(([label, items]) => ({
     label,
     conceptos: items,
-    subtotal: items.reduce((s, c) => s + parseFloat(c.importe), 0),
+    subtotal: items.reduce((s, c) => s + (Number(c.importe) || 0), 0),
   }));
 }
