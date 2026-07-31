@@ -22,6 +22,12 @@ interface Props {
   trabajos: Trabajo[];
 }
 
+function barColor(pct: number): string {
+  if (pct >= 100) return 'bg-red-500';
+  if (pct >= 75) return 'bg-orange-400';
+  return 'bg-blue-500';
+}
+
 export function FrenteSection({ frenteId, proyectoId, clave, nombre, trabajos }: Props) {
   const [showForm, setShowForm] = useState(false);
   const [pending, startTransition] = useTransition();
@@ -43,7 +49,7 @@ export function FrenteSection({ frenteId, proyectoId, clave, nombre, trabajos }:
   );
   const totalEjercido = trabajos.reduce((sum, t) => sum + parseFloat(t.ejercido), 0);
   const pct = totalPresupuesto > 0
-    ? Math.min(100, (totalEjercido / totalPresupuesto) * 100)
+    ? (totalEjercido / totalPresupuesto) * 100
     : 0;
   const sobreEjercido = totalEjercido > totalPresupuesto;
 
@@ -131,8 +137,8 @@ export function FrenteSection({ frenteId, proyectoId, clave, nombre, trabajos }:
       {totalPresupuesto > 0 && (
         <div className="h-1.5 bg-gray-100 w-full">
           <div
-            className={`h-full transition-all duration-300 ${sobreEjercido ? 'bg-red-500' : 'bg-blue-500'}`}
-            style={{ width: `${pct}%` }}
+            className={`h-full transition-all duration-300 ${barColor(pct)}`}
+            style={{ width: `${Math.min(100, pct)}%` }}
           />
         </div>
       )}
