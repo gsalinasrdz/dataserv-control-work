@@ -1,6 +1,6 @@
 import { withUserContext, type UserContext } from '@/lib/db/context';
 import { facturas, facturaConceptos, asignaciones, trabajos } from '@/lib/db/schema';
-import { eq, desc, inArray, and } from 'drizzle-orm';
+import { eq, desc, inArray, and, sql } from 'drizzle-orm';
 
 export async function getFacturas(ctx: UserContext) {
   return withUserContext(ctx, async (tx) =>
@@ -76,4 +76,45 @@ export async function getFacturaConDetalles(ctx: UserContext, facturaId: string)
       })),
     };
   });
+}
+
+export async function getFacturasByProyecto(ctx: UserContext, proyectoId: string) {
+  type Row = {
+    id: string;
+    uuidFiscal: string;
+    serie: string | null;
+    folio: string | null;
+    nombreEmisor: string;
+    rfcEmisor: string;
+    total: string;
+    moneda: string;
+    fechaEmision: Date;
+    estado: string;
+    importeAsignado: string;
+  };
+
+  return withUserContext(ctx, async (tx) =>
+    tx.execute(sql`
+      SELECT
+        f.id,
+        f.uuid_fiscal        AS "uuidFiscal",
+        f.serie,
+        f.folio,
+        f.nombre_emisor      AS "nombreEmisor",
+        f.rfc_emisor         AS "rfcEmisor",
+        f.total,
+        f.moneda,
+        f.fecha_emision      AS "fechaEmision",
+        f.estado,
+        SUM(a.importe)::text AS "importeAsignado"
+      FROM facturas f
+      JOIN factura_conceptos fc ON fc.factura_id = f.id
+      JOIN asignaciones a ON a.factura_concepto_id = fc.id
+      WHERE a.proyecto_id = ${proyectoId}
+        AND a.estado = 'autorizada'
+      GROUP BY f.id, f.uuid_fiscal, f.serie, f.folio, f.nombre_emisor,
+               f.rfc_emisor, f.total, f.moneda, f.fecha_emision, f.estado
+      ORDER BY f.fecha_emision DESC
+    `)
+  ) as unknown as Row[];
 }
