@@ -1,3 +1,4 @@
+// src/app/(dashboard)/layout.tsx
 import { auth, signOut } from '@/auth';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
@@ -10,14 +11,19 @@ export default async function DashboardLayout({ children }: { children: React.Re
   if (!session) redirect('/login');
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <nav className="bg-white shadow-sm border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-14 flex items-center justify-between">
-          <div className="flex items-center gap-8">
-            <Link href="/" className="font-bold text-gray-900 text-base tracking-tight">
-              OpsCore
+    <div className="min-h-screen bg-slate-100">
+      <nav className="bg-white border-b border-gray-200 shadow-sm">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-[54px] flex items-center justify-between">
+          <div className="flex items-center gap-6">
+            <Link href="/" className="flex items-center gap-2">
+              <span className="bg-green-600 text-white text-[11px] font-black px-2 py-1 rounded-md tracking-wide">
+                PC
+              </span>
+              <span className="font-bold text-[14px] text-gray-900 tracking-tight hidden sm:block">
+                Proyect Control
+              </span>
             </Link>
-            <div className="hidden sm:flex items-center gap-6">
+            <div className="hidden sm:flex items-center gap-1">
               <NavLink href="/proyectos">Proyectos</NavLink>
               <NavLink href="/facturas">Facturas</NavLink>
               <CatalogosDropdown />
@@ -42,7 +48,8 @@ export default async function DashboardLayout({ children }: { children: React.Re
             </form>
           </div>
         </div>
-        <div className="sm:hidden border-t border-gray-100 px-4 py-2 flex gap-4 overflow-x-auto">
+        {/* Mobile nav */}
+        <div className="sm:hidden border-t border-gray-100 px-4 py-2 flex gap-1 overflow-x-auto">
           <NavLink href="/proyectos">Proyectos</NavLink>
           <NavLink href="/facturas">Facturas</NavLink>
           <NavLink href="/catalogos/proveedores">Proveedores</NavLink>

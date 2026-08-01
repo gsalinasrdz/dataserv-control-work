@@ -1,3 +1,4 @@
+// src/app/(dashboard)/components/NavLink.tsx
 'use client';
 
 import Link from 'next/link';
@@ -20,10 +21,10 @@ export function NavLink({ href, children, exact = false }: NavLinkProps) {
     <Link
       href={href}
       className={cn(
-        'text-sm transition-colors',
+        'text-sm px-4 py-1.5 rounded-full transition-colors font-medium',
         isActive
-          ? 'text-gray-900 font-semibold border-b-2 border-blue-600 pb-0.5'
-          : 'text-gray-500 hover:text-gray-900',
+          ? 'bg-green-600 text-white'
+          : 'text-gray-500 hover:bg-gray-100 hover:text-gray-900',
       )}
     >
       {children}

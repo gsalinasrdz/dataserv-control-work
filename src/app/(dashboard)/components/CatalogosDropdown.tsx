@@ -1,3 +1,4 @@
+// src/app/(dashboard)/components/CatalogosDropdown.tsx
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
@@ -21,9 +22,7 @@ export function CatalogosDropdown() {
     return () => document.removeEventListener('mousedown', handleOutsideClick);
   }, []);
 
-  useEffect(() => {
-    setOpen(false);
-  }, [pathname]);
+  useEffect(() => { setOpen(false); }, [pathname]);
 
   return (
     <div ref={ref} className="relative">
@@ -32,10 +31,10 @@ export function CatalogosDropdown() {
         aria-haspopup="true"
         aria-expanded={open}
         className={cn(
-          'text-sm transition-colors flex items-center gap-1',
+          'text-sm px-4 py-1.5 rounded-full transition-colors font-medium flex items-center gap-1',
           isActive
-            ? 'text-gray-900 font-semibold'
-            : 'text-gray-500 hover:text-gray-900',
+            ? 'bg-green-600 text-white'
+            : 'text-gray-500 hover:bg-gray-100 hover:text-gray-900',
         )}
       >
         Catálogos
