@@ -10,10 +10,3 @@ export function estadoBadge(estado: string): string {
   };
   return map[estado] ?? 'bg-gray-100 text-gray-600';
 }
-
-/** Colores para la barra de riesgo presupuestal */
-export function riesgoColor(pct: number): { bar: string; text: string } {
-  if (pct > 85) return { bar: 'bg-red-500',   text: 'text-red-600' };
-  if (pct > 70) return { bar: 'bg-amber-400', text: 'text-amber-600' };
-  return              { bar: 'bg-green-500', text: 'text-green-600' };
-}
