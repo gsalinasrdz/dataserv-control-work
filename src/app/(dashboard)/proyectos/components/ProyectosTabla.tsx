@@ -1,7 +1,9 @@
+// src/app/(dashboard)/proyectos/components/ProyectosTabla.tsx
 'use client';
 
 import { useState } from 'react';
 import Link from 'next/link';
+import { estadoBadge } from '@/lib/badge';
 
 interface Proyecto {
   id: string;
@@ -12,12 +14,6 @@ interface Proyecto {
   fechaInicio: string | null;
   fechaFinEstimada: string | null;
 }
-
-const ESTADO_BADGE: Record<string, string> = {
-  activo: 'bg-green-100 text-green-800',
-  pausado: 'bg-yellow-100 text-yellow-800',
-  cerrado: 'bg-gray-100 text-gray-600',
-};
 
 const ESTADOS = ['todos', 'activo', 'pausado', 'cerrado'] as const;
 
@@ -50,24 +46,24 @@ export function ProyectosTabla({ proyectos }: Props) {
   });
 
   return (
-    <div className="space-y-4">
-      {/* Barra de filtros */}
+    <div className="space-y-3">
+      {/* Filtros */}
       <div className="flex flex-col sm:flex-row gap-3">
         <input
           type="search"
           placeholder="Buscar por clave, nombre o empresa…"
           value={busqueda}
           onChange={(e) => setBusqueda(e.target.value)}
-          className="border border-gray-200 rounded-lg px-3 py-2 text-sm flex-1 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="border border-gray-200 rounded-lg px-3 py-2 text-sm flex-1 focus:outline-none focus:ring-2 focus:ring-green-500"
         />
         <div className="flex gap-1">
           {ESTADOS.map((e) => (
             <button
               key={e}
               onClick={() => setEstadoFiltro(e)}
-              className={`px-3 py-2 rounded-lg text-xs font-medium transition-colors ${
+              className={`px-3 py-1.5 rounded-full text-xs font-semibold transition-colors ${
                 estadoFiltro === e
-                  ? 'bg-gray-900 text-white'
+                  ? 'bg-green-600 text-white'
                   : 'bg-white border border-gray-200 text-gray-600 hover:border-gray-400'
               }`}
             >
@@ -78,57 +74,63 @@ export function ProyectosTabla({ proyectos }: Props) {
       </div>
 
       {lista.length === 0 ? (
-        <div className="bg-white rounded-lg border border-gray-200 p-8 text-center text-gray-400 text-sm">
+        <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-8 text-center text-gray-400 text-sm">
           {busqueda || estadoFiltro !== 'todos'
             ? 'Sin resultados para el filtro actual.'
             : 'Sin proyectos registrados.'}
         </div>
       ) : (
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
-              <tr>
-                {['Clave', 'Nombre', 'Empresa', 'Estado', 'Inicio', 'Fin est.'].map((h) => (
+        <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+          <table className="min-w-full">
+            <thead>
+              <tr className="bg-gray-50 border-b border-gray-100">
+                {['Clave', 'Nombre', 'Empresa', 'Estado', 'Inicio', 'Fin est.', 'Ejercido'].map((h) => (
                   <th
                     key={h}
-                    className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                    className="px-5 py-2.5 text-left text-[10px] font-bold text-gray-400 uppercase tracking-wide"
                   >
                     {h}
                   </th>
                 ))}
               </tr>
             </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              {lista.map((p) => (
-                <tr key={p.id} className="hover:bg-gray-50">
-                  <td className="px-4 py-3 text-sm font-mono">
-                    <Link
-                      href={`/proyectos/${p.id}`}
-                      className="text-blue-600 hover:underline font-medium"
-                    >
-                      {p.clave}
-                    </Link>
-                  </td>
-                  <td className="px-4 py-3 text-sm text-gray-900">{p.nombre}</td>
-                  <td className="px-4 py-3 text-sm text-gray-500">{p.empresa ?? '—'}</td>
-                  <td className="px-4 py-3 text-sm">
-                    <span
-                      className={`inline-flex px-2 py-0.5 rounded-full text-xs font-medium ${
-                        ESTADO_BADGE[p.estado] ?? 'bg-gray-100 text-gray-600'
-                      }`}
-                    >
-                      {p.estado}
-                    </span>
-                  </td>
-                  <td className="px-4 py-3 text-sm text-gray-500">{formatDate(p.fechaInicio)}</td>
-                  <td className="px-4 py-3 text-sm text-gray-500">
-                    {formatDate(p.fechaFinEstimada)}
-                  </td>
-                </tr>
-              ))}
+            <tbody>
+              {lista.map((p, i) => {
+                return (
+                  <tr
+                    key={p.id}
+                    className={`border-b border-gray-50 last:border-0 hover:bg-gray-50 transition-colors ${
+                      i % 2 === 0 ? '' : 'bg-gray-50/40'
+                    }`}
+                  >
+                    <td className="px-5 py-3 font-mono text-xs">
+                      <Link
+                        href={`/proyectos/${p.id}`}
+                        className="text-green-600 hover:underline font-semibold"
+                      >
+                        {p.clave}
+                      </Link>
+                    </td>
+                    <td className="px-5 py-3 text-sm font-semibold text-gray-900">{p.nombre}</td>
+                    <td className="px-5 py-3 text-sm text-gray-500">{p.empresa ?? '—'}</td>
+                    <td className="px-5 py-3">
+                      <span className={`inline-flex px-2 py-0.5 rounded-full text-[10px] font-semibold ${estadoBadge(p.estado)}`}>
+                        {p.estado}
+                      </span>
+                    </td>
+                    <td className="px-5 py-3 text-xs text-gray-400">{formatDate(p.fechaInicio)}</td>
+                    <td className="px-5 py-3 text-xs text-gray-400">{formatDate(p.fechaFinEstimada)}</td>
+                    <td className="px-5 py-3">
+                      <Link href={`/proyectos/${p.id}`} className="text-xs text-green-600 font-semibold hover:underline">
+                        Ver →
+                      </Link>
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
-          <div className="px-4 py-2 border-t border-gray-100 text-xs text-gray-400">
+          <div className="px-5 py-2 border-t border-gray-100 text-xs text-gray-400">
             {lista.length} de {proyectos.length} proyectos
           </div>
         </div>
