@@ -1,10 +1,8 @@
-import { renderToBuffer, type DocumentProps } from '@react-pdf/renderer';
 import { NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/auth/server';
 import { getResumenProyecto } from '@/lib/queries/proyectos';
 import { groupConceptos, type ConceptoReporte } from '@/lib/queries/reporte';
-import { ReportePDF } from '@/lib/pdf/ReportePDF';
-import React, { type JSXElementConstructor, type ReactElement } from 'react';
+import React from 'react';
 
 interface RequestBody {
   conceptos: ConceptoReporte[];
@@ -34,12 +32,19 @@ export async function POST(
       year: 'numeric',
     });
 
+    // Dynamic imports to prevent webpack from bundling these ESM-only packages
+    const [{ renderToBuffer }, { ReportePDF }] = await Promise.all([
+      import('@react-pdf/renderer'),
+      import('@/lib/pdf/ReportePDF'),
+    ]);
+
     const buffer = await renderToBuffer(
-      React.createElement(ReportePDF, {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      React.createElement(ReportePDF as any, {
         proyecto: { nombre: proyecto.nombre, clave: proyecto.clave },
         grupos,
         fecha,
-      }) as unknown as ReactElement<DocumentProps, JSXElementConstructor<DocumentProps>>,
+      }),
     );
 
     return new NextResponse(new Uint8Array(buffer), {
