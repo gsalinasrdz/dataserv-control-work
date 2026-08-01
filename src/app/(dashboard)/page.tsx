@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic';
+
 import { requireAuth } from '@/lib/auth/server';
 import { getResumenDashboard } from '@/lib/queries/organizaciones';
 import Link from 'next/link';
