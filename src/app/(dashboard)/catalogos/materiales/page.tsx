@@ -9,12 +9,12 @@ export default async function MaterialesPage() {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-gray-900">Materiales</h1>
+        <h1 className="text-2xl font-extrabold text-gray-900 tracking-tight">Materiales</h1>
         <Link
           href="/catalogos/materiales/nuevo"
-          className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700"
+          className="bg-green-600 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-green-700 transition-colors"
         >
-          Nuevo material
+          + Nuevo material
         </Link>
       </div>
       <MaterialesTabla materiales={lista} />

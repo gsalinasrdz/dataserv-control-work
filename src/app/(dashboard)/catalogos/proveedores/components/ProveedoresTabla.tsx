@@ -31,55 +31,55 @@ export function ProveedoresTabla({ proveedores }: Props) {
   });
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-3">
       <input
         type="search"
         placeholder="Buscar por nombre, RFC, contacto o email…"
         value={busqueda}
         onChange={(e) => setBusqueda(e.target.value)}
-        className="border border-gray-200 rounded-lg px-3 py-2 text-sm w-full sm:max-w-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+        className="border border-gray-200 rounded-lg px-3 py-2 text-sm w-full sm:max-w-sm focus:outline-none focus:ring-2 focus:ring-green-500"
       />
 
       {lista.length === 0 ? (
-        <div className="bg-white rounded-lg border border-gray-200 p-8 text-center text-gray-400 text-sm">
+        <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-8 text-center text-gray-400 text-sm">
           {busqueda ? 'Sin resultados para el filtro actual.' : 'Sin proveedores registrados.'}
         </div>
       ) : (
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
-              <tr>
+        <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+          <table className="min-w-full">
+            <thead>
+              <tr className="bg-gray-50 border-b border-gray-100">
                 {['Nombre', 'RFC', 'Contacto', 'Teléfono', 'Email', ''].map((h) => (
                   <th
                     key={h}
-                    className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                    className="px-5 py-2.5 text-left text-[10px] font-bold text-gray-400 uppercase tracking-wide"
                   >
                     {h}
                   </th>
                 ))}
               </tr>
             </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
+            <tbody>
               {lista.map((p) => (
-                <tr key={p.id} className="hover:bg-gray-50 text-sm">
-                  <td className="px-4 py-3 font-medium text-gray-900">{p.nombre}</td>
-                  <td className="px-4 py-3 text-gray-500 font-mono text-xs">{p.rfc ?? '—'}</td>
-                  <td className="px-4 py-3 text-gray-500">{p.contacto ?? '—'}</td>
-                  <td className="px-4 py-3 text-gray-500">{p.telefono ?? '—'}</td>
-                  <td className="px-4 py-3 text-gray-500">{p.email ?? '—'}</td>
-                  <td className="px-4 py-3 text-right">
+                <tr key={p.id} className="border-b border-gray-50 last:border-0 hover:bg-gray-50 transition-colors">
+                  <td className="px-5 py-3 text-sm font-semibold text-gray-900">{p.nombre}</td>
+                  <td className="px-5 py-3 text-xs text-gray-500 font-mono">{p.rfc ?? '—'}</td>
+                  <td className="px-5 py-3 text-sm text-gray-500">{p.contacto ?? '—'}</td>
+                  <td className="px-5 py-3 text-sm text-gray-500">{p.telefono ?? '—'}</td>
+                  <td className="px-5 py-3 text-sm text-gray-500">{p.email ?? '—'}</td>
+                  <td className="px-5 py-3 text-right">
                     <Link
                       href={`/catalogos/proveedores/${p.id}`}
-                      className="text-blue-600 hover:underline text-sm font-medium"
+                      className="text-xs text-green-600 font-semibold hover:underline"
                     >
-                      Editar
+                      Editar →
                     </Link>
                   </td>
                 </tr>
               ))}
             </tbody>
           </table>
-          <div className="px-4 py-2 border-t border-gray-100 text-xs text-gray-400">
+          <div className="px-5 py-2 border-t border-gray-100 text-xs text-gray-400">
             {lista.length} de {proveedores.length} proveedores
           </div>
         </div>
