@@ -93,7 +93,7 @@ export async function getFacturasByProyecto(ctx: UserContext, proyectoId: string
     importeAsignado: string;
   };
 
-  return withUserContext(ctx, async (tx) =>
+  const { rows } = await withUserContext(ctx, async (tx) =>
     tx.execute(sql`
       SELECT
         f.id,
@@ -116,5 +116,6 @@ export async function getFacturasByProyecto(ctx: UserContext, proyectoId: string
                f.rfc_emisor, f.total, f.moneda, f.fecha_emision, f.estado
       ORDER BY f.fecha_emision DESC
     `)
-  ) as unknown as Row[];
+  ) as unknown as { rows: Row[] };
+  return rows;
 }

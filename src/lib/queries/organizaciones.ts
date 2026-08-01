@@ -25,7 +25,7 @@ export async function getResumenDashboard(ctx: UserContext) {
     ejercido_total: string;
   };
 
-  const presupRows = await withUserContext(ctx, async (tx) =>
+  const { rows: presupRows } = await withUserContext(ctx, async (tx) =>
     tx.execute(sql`
       SELECT
         COUNT(DISTINCT p.id) FILTER (WHERE p.estado = 'activo')::int AS proyectos_activos,
@@ -36,19 +36,19 @@ export async function getResumenDashboard(ctx: UserContext) {
       LEFT JOIN trabajos t ON t.frente_id = f.id
       LEFT JOIN movimientos_costo mc ON mc.trabajo_id = t.id
     `),
-  ) as unknown as PresupRow[];
+  ) as unknown as { rows: PresupRow[] };
 
   const presupRow = presupRows[0];
 
   type EstadoRow = { estado: string; total: string };
-  const facturasRows = await withUserContext(ctx, async (tx) =>
+  const { rows: facturasRows } = await withUserContext(ctx, async (tx) =>
     tx.execute(sql`
       SELECT estado, COUNT(*)::text AS total FROM facturas GROUP BY estado
     `),
-  ) as unknown as EstadoRow[];
+  ) as unknown as { rows: EstadoRow[] };
 
   type RiesgoRow = { en_riesgo: number };
-  const riesgoRows = await withUserContext(ctx, async (tx) =>
+  const { rows: riesgoRows } = await withUserContext(ctx, async (tx) =>
     tx.execute(sql`
       SELECT COUNT(*)::int AS en_riesgo
       FROM (
@@ -65,7 +65,7 @@ export async function getResumenDashboard(ctx: UserContext) {
             > 0.85 * COALESCE(SUM(t.presupuesto_cantidad * t.presupuesto_unitario), 0)
       ) sub
     `),
-  ) as unknown as RiesgoRow[];
+  ) as unknown as { rows: RiesgoRow[] };
 
   return {
     proyectosActivos: Number(presupRow?.proyectos_activos ?? 0),

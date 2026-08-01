@@ -22,7 +22,7 @@ export async function getConceptosReporte(
   ctx: UserContext,
   proyectoId: string,
 ): Promise<ConceptoReporte[]> {
-  return withUserContext(ctx, async (tx) =>
+  const { rows } = await withUserContext(ctx, async (tx) =>
     tx.execute(sql`
       SELECT
         a.id                    AS "asignacionId",
@@ -41,7 +41,8 @@ export async function getConceptosReporte(
         AND a.estado = 'autorizada'
       ORDER BY fr.orden, fr.clave, fc.descripcion
     `)
-  ) as unknown as ConceptoReporte[];
+  ) as unknown as { rows: ConceptoReporte[] };
+  return rows;
 }
 
 export function groupConceptos(

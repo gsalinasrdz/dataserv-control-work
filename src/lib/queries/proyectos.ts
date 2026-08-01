@@ -43,7 +43,7 @@ export async function getResumenProyecto(ctx: UserContext, proyectoId: string) {
     ejercido_total: string;
   };
 
-  const rows = await withUserContext(ctx, async (tx) =>
+  const { rows } = await withUserContext(ctx, async (tx) =>
     tx.execute(sql`
       SELECT
         p.id,
@@ -61,7 +61,7 @@ export async function getResumenProyecto(ctx: UserContext, proyectoId: string) {
       WHERE p.id = ${proyectoId}
       GROUP BY p.id, p.nombre, p.clave, p.estado, p.fecha_inicio, p.fecha_fin_estimada
     `)
-  ) as unknown as Row[];
+  ) as unknown as { rows: Row[] };
 
   const row = rows[0];
   if (!row) return null;
