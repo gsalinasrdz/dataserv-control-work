@@ -3,7 +3,7 @@ set -e
 cd /opt/opscore
 echo "=== OpsCore Redeploy ==="
 git pull origin master
-npm ci --omit=dev --quiet
+npm ci --quiet
 NODE_ENV=production npm run build 2>&1 | tail -3
 cp -r .next/static .next/standalone/.next/static
 [ -d public ] && cp -r public .next/standalone/public || true

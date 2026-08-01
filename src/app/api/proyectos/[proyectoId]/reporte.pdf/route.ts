@@ -38,9 +38,9 @@ export async function POST(
       import('@/lib/pdf/ReportePDF'),
     ]);
 
-    const buffer = await renderToBuffer(
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      React.createElement(ReportePDF as any, {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const buffer = await (renderToBuffer as any)(
+      React.createElement(ReportePDF, {
         proyecto: { nombre: proyecto.nombre, clave: proyecto.clave },
         grupos,
         fecha,
