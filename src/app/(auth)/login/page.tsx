@@ -1,4 +1,4 @@
-import { signIn } from '@/auth';
+import { loginAction } from './actions';
 
 export default function LoginPage() {
   return (
@@ -10,14 +10,7 @@ export default function LoginPage() {
         </div>
         <h1 className="text-lg font-bold text-gray-800 mb-6">Iniciar sesión</h1>
         <form
-          action={async (formData: FormData) => {
-            'use server';
-            await signIn('credentials', {
-              email: formData.get('email'),
-              password: formData.get('password'),
-              redirectTo: '/',
-            });
-          }}
+          action={loginAction}
           className="space-y-4"
         >
           <div>
