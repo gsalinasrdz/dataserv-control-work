@@ -25,7 +25,7 @@ function makeImapConfig() {
     port:   Number(process.env['EMAIL_PORT'] ?? 993),
     secure: true,
     auth: {
-      user: process.env['EMAIL_USER'] ?? 'dataserv@dataserv.com.mx',
+      user: process.env['EMAIL_USER'] ?? 'dataserv',
       pass: process.env['EMAIL_PASS'] ?? '',
     },
     logger: undefined,
