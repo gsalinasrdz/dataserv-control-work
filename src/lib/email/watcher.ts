@@ -256,7 +256,13 @@ async function pollInbox(ownerDb: OwnerDb): Promise<void> {
       lock.release();
     }
   } catch (err) {
-    console.error('[EmailWatcher] Error en poll:', err instanceof Error ? err.message : err);
+    const e = err as Record<string, unknown>;
+    console.error('[EmailWatcher] Error en poll:', {
+      message: e['message'],
+      serverResponseCode: e['serverResponseCode'],
+      command: e['command'],
+      stack: String(e['stack'] ?? '').split('\n')[1],
+    });
   } finally {
     await client.logout().catch(() => {});
   }
