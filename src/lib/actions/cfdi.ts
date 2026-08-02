@@ -2,9 +2,10 @@
 
 import { requireAuth } from '@/lib/auth/server';
 import { withUserContext } from '@/lib/db/context';
-import { facturas, facturaConceptos } from '@/lib/db/schema';
+import { facturas, facturaConceptos, proveedores } from '@/lib/db/schema';
 import { parseCFDI } from '@/lib/cfdi/parser';
 import { revalidatePath } from 'next/cache';
+import { eq, and } from 'drizzle-orm';
 
 export async function cargarFactura(
   xmlContent: string,
@@ -15,6 +16,29 @@ export async function cargarFactura(
     const parsed = parseCFDI(xmlContent);
 
     const facturaId = await withUserContext(ctx, async (tx) => {
+      // Dar de alta el proveedor si no existe en la organización
+      if (parsed.rfcEmisor) {
+        const existe = await tx
+          .select({ id: proveedores.id })
+          .from(proveedores)
+          .where(
+            and(
+              eq(proveedores.organizacionId, ctx.organizacionId),
+              eq(proveedores.rfc, parsed.rfcEmisor),
+            ),
+          )
+          .limit(1);
+
+        if (existe.length === 0) {
+          await tx.insert(proveedores).values({
+            organizacionId: ctx.organizacionId,
+            nombre: parsed.nombreEmisor,
+            rfc: parsed.rfcEmisor,
+            createdBy: ctx.usuarioId,
+          });
+        }
+      }
+
       const inserted = await tx
         .insert(facturas)
         .values({
