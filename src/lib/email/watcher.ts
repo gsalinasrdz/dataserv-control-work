@@ -28,7 +28,7 @@ function makeImapConfig() {
       user: process.env['EMAIL_USER'] ?? 'dataserv',
       pass: process.env['EMAIL_PASS'] ?? '',
     },
-    logger: undefined,
+    logger: false as const,
     tls: { rejectUnauthorized: false },
   };
 }
