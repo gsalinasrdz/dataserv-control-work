@@ -194,54 +194,63 @@ async function processAttachment(
 async function pollInbox(ownerDb: OwnerDb): Promise<void> {
   const client = new ImapFlow(makeImapConfig());
 
+  // Fase 1: conexión (si falla, no hay nada que cerrar)
   try {
     await client.connect();
+  } catch (err) {
+    console.error('[EmailWatcher] Error conectando:', err instanceof Error ? err.message : err);
+    return;
+  }
+
+  // Fase 2: trabajo con el mailbox
+  try {
     const lock = await client.getMailboxLock('INBOX');
 
     try {
-      const uids = await client.search({ seen: false }, { uid: true });
-      if (!uids || (uids as number[]).length === 0) return;
+      const uids = (await client.search({ seen: false }, { uid: true })) as number[];
 
-      for await (const msg of client.fetch(uids as number[], { source: true, envelope: true }, { uid: true })) {
-        if (!msg.source) continue;
+      if (uids.length > 0) {
+        for await (const msg of client.fetch(uids, { source: true, envelope: true }, { uid: true })) {
+          if (!msg.source) continue;
 
-        let parsed: Awaited<ReturnType<typeof simpleParser>>;
-        try {
-          parsed = await simpleParser(msg.source);
-        } catch {
-          continue;
-        }
+          let parsed: Awaited<ReturnType<typeof simpleParser>>;
+          try {
+            parsed = await simpleParser(msg.source);
+          } catch {
+            continue;
+          }
 
-        const fromAddress = parsed.from?.text ?? 'desconocido';
-        const subject     = parsed.subject ?? '';
-        const receivedAt  = parsed.date ?? new Date();
+          const fromAddress = parsed.from?.text ?? 'desconocido';
+          const subject     = parsed.subject ?? '';
+          const receivedAt  = parsed.date ?? new Date();
 
-        const xmlAttachments = (parsed.attachments ?? []).filter(
-          (a) => a.filename?.toLowerCase().endsWith('.xml') && a.content?.length,
-        );
+          const xmlAttachments = (parsed.attachments ?? []).filter(
+            (a) => a.filename?.toLowerCase().endsWith('.xml') && a.content?.length,
+          );
 
-        if (xmlAttachments.length === 0) {
+          if (xmlAttachments.length === 0) {
+            await client.messageFlagsAdd(msg.uid, ['\\Seen'], { uid: true });
+            continue;
+          }
+
+          for (const attachment of xmlAttachments) {
+            const messageUid = `${msg.uid}_${attachment.filename ?? 'cfdi.xml'}`;
+            const xmlContent = attachment.content.toString('utf-8');
+
+            const status = await processAttachment(ownerDb, {
+              messageUid,
+              fromAddress,
+              subject,
+              receivedAt,
+              xmlFilename: attachment.filename ?? 'cfdi.xml',
+              xmlContent,
+            });
+
+            console.log(`[EmailWatcher] uid=${msg.uid} file=${attachment.filename} → ${status}`);
+          }
+
           await client.messageFlagsAdd(msg.uid, ['\\Seen'], { uid: true });
-          continue;
         }
-
-        for (const attachment of xmlAttachments) {
-          const messageUid = `${msg.uid}_${attachment.filename ?? 'cfdi.xml'}`;
-          const xmlContent = attachment.content.toString('utf-8');
-
-          const status = await processAttachment(ownerDb, {
-            messageUid,
-            fromAddress,
-            subject,
-            receivedAt,
-            xmlFilename: attachment.filename ?? 'cfdi.xml',
-            xmlContent,
-          });
-
-          console.log(`[EmailWatcher] uid=${msg.uid} file=${attachment.filename} → ${status}`);
-        }
-
-        await client.messageFlagsAdd(msg.uid, ['\\Seen'], { uid: true });
       }
     } finally {
       lock.release();
