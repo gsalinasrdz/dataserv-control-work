@@ -2,3 +2,4 @@ export * from './tenancy';
 export * from './proyectos';
 export * from './catalogos';
 export * from './cfdi';
+export * from './email-log';
